@@ -15,83 +15,52 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset
 
+import os
+import torch
+from torch.utils.data import Dataset
+from PIL import Image
+
 
 class CustomDataset(Dataset):
     def __init__(self, data_dir, annotation_file, transform=None):
-        """
-        Initialize the CustomDataset.
-
-        Args:
-            data_dir (str): Path to the directory containing image data.
-            annotation_file (str): Path to the annotation file.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
-        self.data_dir = 'D:/RS'
-        self.annotation_file = 'D:/RS/20SEP.tif'
+        self.data_dir = data_dir
+        self.annotation_file = annotation_file
         self.transform = transform
         self.class_to_idx = {'elephant': 0, 'lion': 1, 'giraffe': 2, 'zebra': 3, 'rhino': 4}
         self.annotations = self.load_annotations()
 
-    def __len__(self):
-        """
-        Returns the total number of samples in the dataset.
-        """
-        return len(self.annotations)
+    def load_annotations(self):
+
+    # Load annotations from the annotation file
+    # Return a list of dictionaries with image filename and annotations
 
     def __getitem__(self, idx):
-        """
-        Gets a sample from the dataset at the specified index.
+        annotation = self.annotations[idx]
+        image_name = annotation['image']
+        boxes = annotation['boxes']
 
-        Args:
-            idx (int): Index of the sample to retrieve.
+        # Load and preprocess the image patch
+        image_path = os.path.join(self.data_dir, image_name)
+        image = Image.open(image_path).convert("RGB")
 
-        Returns:
-            image (Tensor): The image data as a tensor.
-            target (dict): Dictionary containing target information including boxes and labels.
-        """
-        img_path = os.path.join(self.data_dir, self.annotations[idx]['image'])
-        image = Image.open(img_path).convert('RGB')
-
-        # Extract bounding box annotations and labels
-        boxes = self.annotations[idx]['boxes']
-        labels = [self.class_to_idx[annot['category']] for annot in boxes]
-        boxes = torch.FloatTensor([annot['bbox'] for annot in boxes])
-
-        # Construct target dictionary
-        target = {'boxes': boxes, 'labels': labels}
-
-        # Apply data transformations if provided
         if self.transform:
             image = self.transform(image)
 
+        # Prepare target
+        num_boxes = len(boxes)
+        target = {
+            'boxes': torch.tensor([box['bbox'] for box in boxes], dtype=torch.float32),
+            'labels': torch.tensor([self.class_to_idx[box['category']] for box in boxes]),
+            'image_id': torch.tensor([idx]),
+            'area': torch.tensor(
+                [(box['bbox'][2] - box['bbox'][0]) * (box['bbox'][3] - box['bbox'][1]) for box in boxes]),
+            'iscrowd': torch.zeros((num_boxes,), dtype=torch.int64)
+        }
+
         return image, target
 
-    def load_annotations(self):
-        """
-        Load annotations from the specified annotation file.
-
-        Returns:
-            annotations (list): List of dictionaries containing image filename and annotations.
-        """
-        annotations = []
-        with open(self.annotation_file, 'rb') as f:
-            lines = f.readlines()
-        for line in lines:
-            try:
-                decoded_line = line.decode('utf-8', errors='ignore').strip()
-                parts = decoded_line.split(',')
-                image_name = parts[0]
-                boxes = []
-                for box_str in parts[1:]:
-                    box = box_str.split()
-                    category = box[0]
-                    bbox = [float(coord) for coord in box[1:]]
-                    boxes.append({'category': category, 'bbox': bbox})
-                annotations.append({'image': image_name, 'boxes': boxes})
-            except Exception as e:
-                print("Error processing line:", line)
-                print("Error message:", e)
-        return annotations
+    def __len__(self):
+        return len(self.annotations)
 
 
 import torch
