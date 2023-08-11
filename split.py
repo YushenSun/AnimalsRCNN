@@ -29,8 +29,8 @@ def split_image(input_image_path, output_folder, block_size, overlap):
     dataset = None
 
 if __name__ == "__main__":
-    input_image_path = "D:/RS/20SEP.tif"
-    output_folder = "D:/RS/Blocks_20SEP"
+    input_image_path = "D:/RS/17JUL.tif"
+    output_folder = "D:/RS/Blocks_17JUL"
     block_size = 1024
     overlap = 10
 

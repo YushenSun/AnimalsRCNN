@@ -1,127 +1,88 @@
+import os
+import torchvision.transforms as transforms
+from PIL import Image
+import torch
+from torch.utils.data import Dataset, DataLoader
+from osgeo import gdal
+import numpy as np
+from torch.utils.data import DataLoader
+
 # Define the list of target class labels
 classes = ['elephant', 'lion', 'giraffe', 'zebra', 'rhino', 'non-animal']
 
 # Assign unique integer codes to each target class
 class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
 
-# You can define more target classes and codes as needed
+# Define the path to your dataset and annotation file
+data_dir = 'D:/RS/Blocks_20SEP'
+annotation_file = 'D:/RS/ano/20SEP.csv'  # Replace with the actual annotation file path
 
-# Print the class labels and their corresponding integer codes
-for cls, idx in class_to_idx.items():
-    print(f'{cls}: {idx}')
+# Define a transform to preprocess the input image (if needed)
+transform = transforms.Compose([
+    # Add your transformations here if needed
+])
 
-import os
-from PIL import Image
-import torch
-from torch.utils.data import Dataset
-
-import os
-import torch
-from torch.utils.data import Dataset
-from PIL import Image
-
-
+# CustomDataset class
 class CustomDataset(Dataset):
     def __init__(self, data_dir, annotation_file, transform=None):
         self.data_dir = data_dir
         self.annotation_file = annotation_file
         self.transform = transform
-        self.class_to_idx = {'elephant': 0, 'lion': 1, 'giraffe': 2, 'zebra': 3, 'rhino': 4}
+        self.class_to_idx = class_to_idx
         self.annotations = self.load_annotations()
 
     def load_annotations(self):
-
-    # Load annotations from the annotation file
-    # Return a list of dictionaries with image filename and annotations
+        annotations = []
+        with open(self.annotation_file, 'r') as f:
+            lines = f.readlines()
+            for line in lines[1:]:  # Skip the header line
+                line = line.strip().split(',')
+                image_name = line[0]
+                boxes = []
+                category = line[1]
+                bbox = [float(coord) for coord in line[2:]]
+                boxes.append({'category': category, 'bbox': bbox})
+                annotations.append({'image': image_name, 'boxes': boxes})
+        return annotations
 
     def __getitem__(self, idx):
         annotation = self.annotations[idx]
         image_name = annotation['image']
-        boxes = annotation['boxes']
-
-        # Load and preprocess the image patch
         image_path = os.path.join(self.data_dir, image_name)
-        image = Image.open(image_path).convert("RGB")
 
+        # Open the image using gdal
+        image = gdal.Open(image_path)
+        image_array = np.array(image.ReadAsArray(), dtype=np.uint8)  # Convert to a NumPy array
+
+        # Preprocess image if transform is provided
         if self.transform:
-            image = self.transform(image)
+            image_array = self.transform(image_array)
 
-        # Prepare target
-        num_boxes = len(boxes)
+        # Prepare target information
+        num_boxes = len(annotation['boxes'])
         target = {
-            'boxes': torch.tensor([box['bbox'] for box in boxes], dtype=torch.float32),
-            'labels': torch.tensor([self.class_to_idx[box['category']] for box in boxes]),
-            'image_id': torch.tensor([idx]),
-            'area': torch.tensor(
-                [(box['bbox'][2] - box['bbox'][0]) * (box['bbox'][3] - box['bbox'][1]) for box in boxes]),
-            'iscrowd': torch.zeros((num_boxes,), dtype=torch.int64)
+            'boxes': torch.tensor([box['bbox'] for box in annotation['boxes']], dtype=torch.float32),
+            'labels': torch.tensor([self.class_to_idx[box['category']] for box in annotation['boxes']]),
         }
 
-        return image, target
+        return image_array, target
 
     def __len__(self):
         return len(self.annotations)
 
+# Instantiate the CustomDataset
+custom_dataset = CustomDataset(data_dir, annotation_file, transform)
 
-import torch
-import torchvision
-from torchvision.models.detection import FasterRCNN
-from torchvision.models.detection.rpn import AnchorGenerator
-from torch.utils.data import DataLoader
-import torchvision
-from torchvision.models.detection import FasterRCNN
-from torchvision.models.detection.rpn import AnchorGenerator
-from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+# Create a DataLoader for training
+train_loader = DataLoader(
+    dataset=custom_dataset,
+    batch_size=1,  # Adjust batch size as needed
+    num_workers=0,  # You can increase this value for faster data loading
+    shuffle=True,
+    collate_fn=lambda x: list(zip(*x))  # This collates the data into batches
+)
 
-
-
-# Define your custom dataset class (assuming you have implemented it)
-# from custom_dataset import CustomDataset
-
-# Set device
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-
-# Define hyperparameters
-num_classes = 2  # Number of classes (including background)
-batch_size = 2
-learning_rate = 0.001
-num_epochs = 10
-
-# Load pre-trained Faster R-CNN model
-model = torchvision.models.detection.fasterrcnn_resnet50_fpn(weights=True)
-# Replace the classifier with a new one, customized for your number of classes
-in_features = model.roi_heads.box_predictor.cls_score.in_features
-model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
-
-# Define the data loaders for training and validation
-train_dataset = CustomDataset(data_dir='D:/RS',
-                              annotation_file='20SEP.tif')
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, collate_fn=utils.collate_fn)
-
-# Move the model and data loaders to the appropriate device
-model.to(device)
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=2, shuffle=True, num_workers=4, collate_fn=utils.collate_fn)
-
-# Define optimizer and learning rate scheduler
-params = [p for p in model.parameters() if p.requires_grad]
-optimizer = torch.optim.SGD(params, lr=learning_rate, momentum=0.9, weight_decay=0.0005)
-lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.1)
-
-# Training loop
-for epoch in range(num_epochs):
-    model.train()
-    for images, targets in train_loader:
-        images = list(image.to(device) for image in images)
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
-
-        loss_dict = model(images, targets)
-        losses = sum(loss for loss in loss_dict.values())
-
-        optimizer.zero_grad()
-        losses.backward()
-        optimizer.step()
-
-    lr_scheduler.step()
-
-# Save the trained model
-torch.save(model.state_dict(), 'trained_model.pth')
+# Iterate through the train_loader
+for images, targets in train_loader:
+    # Forward pass, loss calculation, and backpropagation here
+    # Implement your training loop logic
