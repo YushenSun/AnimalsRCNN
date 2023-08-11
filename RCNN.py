@@ -1,11 +1,10 @@
-import os
 import torchvision.transforms as transforms
-from PIL import Image
+from osgeo import gdal
+import os
+import gdal
+import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
-from osgeo import gdal
-import numpy as np
-from torch.utils.data import DataLoader
 
 # Define the list of target class labels
 classes = ['elephant', 'lion', 'giraffe', 'zebra', 'rhino', 'non-animal']
@@ -21,6 +20,7 @@ annotation_file = 'D:/RS/ano/20SEP.csv'  # Replace with the actual annotation fi
 transform = transforms.Compose([
     # Add your transformations here if needed
 ])
+
 
 # CustomDataset class
 class CustomDataset(Dataset):
@@ -50,25 +50,24 @@ class CustomDataset(Dataset):
         image_name = annotation['image']
         image_path = os.path.join(self.data_dir, image_name)
 
-        # Open the image using gdal
-        image = gdal.Open(image_path)
-        image_array = np.array(image.ReadAsArray(), dtype=np.uint8)  # Convert to a NumPy array
+        # Open image using GDAL
+        dataset = gdal.Open(image_path)
+        image = dataset.ReadAsArray()
 
-        # Preprocess image if transform is provided
-        if self.transform:
-            image_array = self.transform(image_array)
+        # Convert to torch tensor and specify the data type
+        image = torch.from_numpy(image.astype(np.float32))  # or np.float64
 
-        # Prepare target information
         num_boxes = len(annotation['boxes'])
         target = {
             'boxes': torch.tensor([box['bbox'] for box in annotation['boxes']], dtype=torch.float32),
             'labels': torch.tensor([self.class_to_idx[box['category']] for box in annotation['boxes']]),
         }
 
-        return image_array, target
+        return image, target
 
     def __len__(self):
         return len(self.annotations)
+
 
 # Instantiate the CustomDataset
 custom_dataset = CustomDataset(data_dir, annotation_file, transform)
@@ -83,6 +82,8 @@ train_loader = DataLoader(
 )
 
 # Iterate through the train_loader
-for images, targets in train_loader:
+for batch in train_loader:
+    images, targets = batch  # Extract the images and targets from the batch tuple
+    images = torch.stack(images)  # Convert list of images to a tensor
     # Forward pass, loss calculation, and backpropagation here
     # Implement your training loop logic
