@@ -13,8 +13,8 @@ classes = ['elephant', 'lion', 'giraffe', 'zebra', 'rhino', 'non-animal']
 class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
 
 # Define the path to your dataset and annotation file
-data_dir = 'D:/RS/Blocks_20SEP'
-annotation_file = 'D:/RS/ano/20SEP.csv'  # Replace with the actual annotation file path
+data_dir = 'D:/RS/Blocks_17JULRGB'
+annotation_file = 'D:/RS/ano/17JUL.csv'  # Replace with the actual annotation file path
 
 # CustomDataset class
 class CustomDataset(Dataset):
@@ -76,8 +76,8 @@ class ChannelwiseNormalize(object):
 # Instantiate the CustomDataset
 transform = transforms.Compose([
     transforms.ToTensor(),  # Convert PIL Image to PyTorch tensor
-    ChannelwiseNormalize(mean=[262, 264, 354, 376, 262, 443, 502, 469],
-                         std=[13, 15, 24, 29, 23, 40, 48, 49]),
+    ChannelwiseNormalize(mean=[128.2, 106.21, 101.5],
+                         std=[17.06, 14.41, 10.31]),
 ])
 
 
@@ -117,9 +117,10 @@ backbone = torchvision.models.detection.backbone_utils.resnet_fpn_backbone('resn
 
 # Define the anchor generator
 rpn_anchor_generator = AnchorGenerator(
-    sizes=((32, 64, 128, 256, 512),),
+    sizes=((32, 64, 128, 256, 512),) * 5,  # 确保与 feature maps 数量匹配
     aspect_ratios=((0.5, 1.0, 2.0),) * 5
 )
+
 
 # Create the Faster R-CNN model
 model = FasterRCNN(
