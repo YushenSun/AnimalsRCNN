@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 
 # Define the list of target class labels
-classes = ['elephant', 'lion', 'giraffe', 'zebra', 'rhino', 'non-animal']
+classes = ['elephant', 'cluster', 'non-animal']
 
 # Assign unique integer codes to each target class
 class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
