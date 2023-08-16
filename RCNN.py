@@ -149,14 +149,14 @@ num_epochs = 10
 
 
 # Define optimizer and learning rate scheduler with modified parameters
-optimizer = optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=0.0005)
-lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.5)  # Reduce LR more frequently
+optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
+lr_scheduler = StepLR(optimizer, step_size=3, gamma=0.1)  # Reduce LR more frequently
 
 # Set the model in training mode
 model.train()
 
 # Number of training epochs for the trial run
-num_epochs = 2  # Train for only a few epochs
+num_epochs = 10  # Train for only a few epochs
 
 
 

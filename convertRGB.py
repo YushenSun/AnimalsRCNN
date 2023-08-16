@@ -16,9 +16,15 @@ cols = dataset.RasterXSize
 num_bands = dataset.RasterCount
 
 # Specify the bands to use for each color channel
+'''
 blue_bands = [1, 2, 3]  # Bands for blue channel (averaged)
 green_bands = [4, 5, 6]  # Bands for green channel (averaged)
 red_bands = [7, 8]  # Bands for red channel (averaged)
+'''
+blue_bands = [3]  # Bands for blue channel (averaged)
+green_bands = [5]  # Bands for green channel (averaged)
+red_bands = [7]  # Bands for red channel (averaged)
+
 
 # Read the pixel values from the specified bands and calculate averages
 blue_data = sum(dataset.GetRasterBand(band).ReadAsArray() for band in blue_bands) / len(blue_bands)
@@ -32,7 +38,7 @@ rgb_array = [red_data, green_data, blue_data]
 rgb_array = [((array - array.min()) / (array.max() - array.min()) * 255).astype('uint8') for array in rgb_array]
 
 # Create a new dataset to save the RGB image
-output_tiff_path = "D:/RS/17JULRGB.tif"
+output_tiff_path = "D:/RS/17JULRGB753.tif"
 driver = gdal.GetDriverByName('GTiff')
 
 output_dataset = driver.Create(output_tiff_path, cols, rows, 3, gdal.GDT_Byte)
