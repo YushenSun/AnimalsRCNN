@@ -1,7 +1,7 @@
 import torch
 from torchvision.models.detection import FasterRCNN
 from torchvision.models.detection.backbone_utils import resnet_fpn_backbone
-from torchvision.transforms import functional as F
+from torchvision.transforms import functional as F, transforms  # Import the transforms module
 from torchvision.models.detection.rpn import AnchorGenerator
 from PIL import Image, ImageDraw
 
@@ -29,12 +29,17 @@ model.load_state_dict(torch.load('D:/RS/models/trained_model1.pth'))
 model.eval()
 
 # Load and preprocess the new image
-image = Image.open('D:/RS/Blocks_17JULRGB/block_1_0.tif')
-image_tensor = F.to_tensor(image).unsqueeze(0)
+image = Image.open('D:/RS/Blocks_17JULRGB/block_0_0.tif')
+
+# Apply the same normalization used during training
+normalize = transforms.Normalize(mean=[128.2, 106.21, 101.5], std=[17.06, 14.41, 10.31])
+image_tensor = F.to_tensor(image)
+image_tensor = normalize(image_tensor).unsqueeze(0)
 
 # Perform inference
 with torch.no_grad():
     predictions = model(image_tensor)
+
 
 # Initialize counters for each class
 class_counters = [0] * len(classes)
@@ -42,7 +47,8 @@ class_counters = [0] * len(classes)
 # Post-processing and visualization
 # Assuming you want to draw bounding boxes on the image
 draw = ImageDraw.Draw(image)
-detection_threshold = 0.5  # Set your own detection threshold
+detection_threshold = 0.0  # Set your own detection threshold
+# detection_threshold = 0.5  # Set your own detection threshold
 for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
     if score > detection_threshold:
         class_counters[label] += 1  # Increment the counter for the detected class

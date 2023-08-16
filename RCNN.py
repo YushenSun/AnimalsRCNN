@@ -4,7 +4,7 @@ import os
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
-from PIL import Image
+import matplotlib.pyplot as plt
 
 # Define the list of target class labels
 classes = ['elephant', 'cluster', 'non-animal']
@@ -129,6 +129,8 @@ model = FasterRCNN(
     rpn_anchor_generator=rpn_anchor_generator
 )
 
+
+
 # Training loop
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
@@ -165,6 +167,9 @@ num_epochs = 2  # Train for only a few epochs
 # Define the device (GPU if available, otherwise CPU)
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
+losses = []  # List to store loss values
+
+
 # Training loop
 for epoch in range(num_epochs):
     for batch_idx, batch in enumerate(train_loader):
@@ -199,6 +204,9 @@ for epoch in range(num_epochs):
         total_loss.backward()
         optimizer.step()
 
+        # Append the loss to the list
+        losses.append(total_loss.item())
+
     # Update the learning rate
     lr_scheduler.step()
 
@@ -206,6 +214,12 @@ for epoch in range(num_epochs):
 
 # ... (continue with validation, evaluation, inference, and saving the model)
 
+# Plot the loss curve
+plt.plot(losses)
+plt.xlabel('Iteration')
+plt.ylabel('Loss')
+plt.title('Training Loss Curve')
+plt.show()
 
 # Save the trained model
 save_path = 'D:/RS/models'
