@@ -133,6 +133,7 @@ model = FasterRCNN(
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
+'''
 # Define optimizer and learning rate scheduler
 optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = StepLR(optimizer, step_size=3, gamma=0.1)
@@ -142,6 +143,24 @@ model.train()
 
 # Number of training epochs
 num_epochs = 10
+'''
+
+
+# Define optimizer and learning rate scheduler with modified parameters
+optimizer = optim.SGD(model.parameters(), lr=0.05, momentum=0.9, weight_decay=0.0005)
+lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.5)  # Reduce LR more frequently
+
+# Set the model in training mode
+model.train()
+
+# Number of training epochs for the trial run
+num_epochs = 2  # Train for only a few epochs
+
+
+
+
+
+
 
 # Define the device (GPU if available, otherwise CPU)
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
@@ -186,3 +205,10 @@ for epoch in range(num_epochs):
     print(f"Epoch [{epoch+1}/{num_epochs}] - Total Loss: {total_loss.item()}")
 
 # ... (continue with validation, evaluation, inference, and saving the model)
+
+
+# Save the trained model
+save_path = 'D:/RS/models'
+model_name = 'trained_model1.pth'
+torch.save(model.state_dict(), os.path.join(save_path, model_name))
+
