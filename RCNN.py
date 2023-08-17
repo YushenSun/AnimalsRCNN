@@ -149,14 +149,14 @@ num_epochs = 10
 
 
 # Define optimizer and learning rate scheduler with modified parameters
-optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
-lr_scheduler = StepLR(optimizer, step_size=3, gamma=0.1)  # Reduce LR more frequently
+optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9, weight_decay=0.0005)
+lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.1)  # Reduce LR more frequently
 
 # Set the model in training mode
 model.train()
 
 # Number of training epochs for the trial run
-num_epochs = 10  # Train for only a few epochs
+num_epochs = 2  # Train for only a few epochs
 
 
 
@@ -182,9 +182,7 @@ for epoch in range(num_epochs):
         # Modify the dimensions of the target boxes to match the number of channels in images
         for t in targets:
             if 'boxes' in t:
-                t['boxes'][:, [0, 2]] *= 8  # Adjust x_min and x_max coordinates
-                t['boxes'][:, [1, 3]] *= 8  # Adjust y_min and y_max coordinates
-
+                pass
         # Zero the gradients
         optimizer.zero_grad()
 
