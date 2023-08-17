@@ -11,9 +11,11 @@ classes = ['elephant', 'cluster', 'non-animal']
 # Define the backbone model for Faster R-CNN
 backbone = resnet_fpn_backbone('resnet50', pretrained=True)
 
+print(backbone)
+
 # Define the anchor generator
 rpn_anchor_generator = AnchorGenerator(
-    sizes=((32, 64, 128, 256, 512),) * 5,  # Make sure to match the number of feature maps
+    sizes=((4, 8, 16, 32, 64),) * 5,  # Make sure to match the number of feature maps
     aspect_ratios=((0.5, 1.0, 2.0),) * 5
 )
 
@@ -24,8 +26,54 @@ model = FasterRCNN(
     rpn_anchor_generator=rpn_anchor_generator
 )
 
+
+# Define a function to visualize intermediate feature maps
+def visualize_feature_maps(model, image_tensor, layer_name):
+    """
+    Visualize the intermediate feature maps of a specific layer in the model.
+
+    Args:
+        model (torch.nn.Module): The object detection model.
+        image_tensor (torch.Tensor): Preprocessed image tensor.
+        layer_name (str): Name of the layer whose feature maps you want to visualize.
+    """
+    # Register forward hook to capture feature maps
+    feature_maps = []
+
+    def hook(module, input, output):
+        feature_maps.append(output)
+
+    layer = model.backbone._modules[layer_name]
+    hook_handle = layer.register_forward_hook(hook)
+
+    # Perform inference
+    with torch.no_grad():
+        model(image_tensor)
+
+    # Unregister the hook
+    hook_handle.remove()
+
+    # Visualize the feature maps
+    num_feature_maps = len(feature_maps)
+    for i, feature_map in enumerate(feature_maps):
+        batch_size, num_channels, height, width = feature_map.shape
+        feature_map = feature_map[0]  # Take the first image in the batch
+        feature_map = feature_map.detach().cpu()
+
+        # Normalize the feature map for visualization
+        feature_map -= feature_map.min()
+        feature_map /= feature_map.max()
+        feature_map *= 255
+
+        # Convert the feature map to an image
+        feature_map_image = transforms.ToPILImage()(feature_map)
+
+        # Display the feature map image
+        feature_map_image.show(title=f'Layer: {layer_name}, Feature Map: {i + 1}/{num_feature_maps}')
+
+
 # Load the trained model weights
-model.load_state_dict(torch.load('D:/RS/models/trained_model1.pth'))
+model.load_state_dict(torch.load('D:/RS/models/trained_model_anchor4_echo5.pth'))
 model.eval()
 
 # Load and preprocess the new image
@@ -36,9 +84,14 @@ normalize = transforms.Normalize(mean=[128.2, 106.21, 101.5], std=[17.06, 14.41,
 image_tensor = F.to_tensor(image)
 image_tensor = normalize(image_tensor).unsqueeze(0)
 
+# Visualize feature maps of a specific layer (e.g., 'layer3')
+# visualize_feature_maps(model, image_tensor, 'layer1')
+
+
 # Perform inference
 with torch.no_grad():
     predictions = model(image_tensor)
+
 
 
 # Initialize counters for each class
@@ -47,7 +100,7 @@ class_counters = [0] * len(classes)
 # Post-processing and visualization
 # Assuming you want to draw bounding boxes on the image
 draw = ImageDraw.Draw(image)
-detection_threshold = 0.5  # Set your own detection threshold
+detection_threshold = 0.1  # Set your own detection threshold
 # detection_threshold = 0.5  # Set your own detection threshold
 for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
     if score > detection_threshold:

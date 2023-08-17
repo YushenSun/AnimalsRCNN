@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
 
+
 # Define the list of target class labels
 classes = ['elephant', 'cluster', 'non-animal']
 
@@ -114,10 +115,16 @@ from torchvision.models.detection.rpn import AnchorGenerator
 
 # Define the backbone model for Faster R-CNN
 backbone = torchvision.models.detection.backbone_utils.resnet_fpn_backbone('resnet50', pretrained=True)
-
+'''
 # Define the anchor generator
 rpn_anchor_generator = AnchorGenerator(
     sizes=((32, 64, 128, 256, 512),) * 5,  # 确保与 feature maps 数量匹配
+    aspect_ratios=((0.5, 1.0, 2.0),) * 5
+)
+'''
+# Define the anchor generator with smaller anchor sizes and reduced feature maps
+rpn_anchor_generator = AnchorGenerator(
+    sizes=((1, 2, 4,6, 8),) * 5,  # Adjust sizes to match the number of feature maps
     aspect_ratios=((0.5, 1.0, 2.0),) * 5
 )
 
@@ -149,14 +156,14 @@ num_epochs = 10
 
 
 # Define optimizer and learning rate scheduler with modified parameters
-optimizer = optim.SGD(model.parameters(), lr=0.0001, momentum=0.9, weight_decay=0.0005)
+optimizer = optim.SGD(model.parameters(), lr=0.00003, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.1)  # Reduce LR more frequently
 
 # Set the model in training mode
 model.train()
 
 # Number of training epochs for the trial run
-num_epochs = 2  # Train for only a few epochs
+num_epochs = 3  # Train for only a few epochs
 
 
 
@@ -212,15 +219,16 @@ for epoch in range(num_epochs):
 
 # ... (continue with validation, evaluation, inference, and saving the model)
 
+
+
+# Save the trained model
+save_path = 'D:/RS/models'
+model_name = 'trained_model_anchor124816.pth'
+torch.save(model.state_dict(), os.path.join(save_path, model_name))
+
 # Plot the loss curve
 plt.plot(losses)
 plt.xlabel('Iteration')
 plt.ylabel('Loss')
 plt.title('Training Loss Curve')
 plt.show()
-
-# Save the trained model
-save_path = 'D:/RS/models'
-model_name = 'trained_model1.pth'
-torch.save(model.state_dict(), os.path.join(save_path, model_name))
-
