@@ -5,6 +5,8 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 
 
 # Define the list of target class labels
@@ -87,14 +89,43 @@ transform = transforms.Compose([
     transforms.ToTensor(),  # Convert PIL Image to PyTorch tensor
 ])
 
-# Print the shape of mean and std
-#print("Mean shape:", np.array([262]).shape)
-#print("Std shape:", np.array([13]).shape)
-
-custom_dataset = CustomDataset(data_dir, annotation_file, transform)
 
 
 custom_dataset = CustomDataset(data_dir, annotation_file, transform)
+
+
+# Print the loaded annotation information for debugging
+# Visualize bounding boxes on images
+for idx, annotation in enumerate(custom_dataset.annotations):
+    print(f"Annotation {idx+1}:")
+    print("Image:", annotation['image'])
+    print("Boxes:", annotation['boxes'])
+    print("Category:", annotation['category'])
+    print("Labels:", [class_to_idx[cat] for cat in annotation['category']])
+    print("=" * 40)
+
+    # Load the image
+    image_path = os.path.join(data_dir, 'block_0_0.tif')
+    image = plt.imread(image_path)
+
+    # Create a figure and axis
+    fig, ax = plt.subplots(1)
+    ax.imshow(image)
+
+    # Visualize bounding boxes on the image
+    for annotation in custom_dataset.annotations:
+        for bbox in annotation['boxes']:
+            x1, y1, x2, y2 = bbox
+            rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, edgecolor='r', facecolor='none')
+            ax.add_patch(rect)
+
+    # Display the image with all bounding boxes
+    plt.title("Bounding Boxes Visualization")
+    plt.show()
+
+# Pause and wait for user input before proceeding
+input("Press Enter to continue...")
+
 
 # Create a DataLoader for training
 train_loader = DataLoader(

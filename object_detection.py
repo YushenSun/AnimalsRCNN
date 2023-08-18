@@ -73,7 +73,7 @@ def visualize_feature_maps(model, image_tensor, layer_name):
 
 
 # Load the trained model weights
-model.load_state_dict(torch.load('D:/RS/models/trained_model_anchor4_echo5.pth'))
+model.load_state_dict(torch.load('D:/RS/models/trained_model_anchor124816.pth'))
 model.eval()
 
 # Load and preprocess the new image
