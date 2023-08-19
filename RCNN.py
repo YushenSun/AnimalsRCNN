@@ -16,7 +16,7 @@ classes = ['elephant', 'cluster', 'non-animal']
 class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
 
 # Define the path to your dataset and annotation file
-data_dir = 'D:/RS/Blocks_17JULRGB'
+data_dir = 'D:/RS/Blocks_17JULRGB_linear'
 annotation_file = 'D:/RS/ano/17JUL.csv'  # Replace with the actual annotation file path
 
 # CustomDataset class
@@ -79,8 +79,8 @@ class ChannelwiseNormalize(object):
 # Instantiate the CustomDataset
 transform = transforms.Compose([
     transforms.ToTensor(),  # Convert PIL Image to PyTorch tensor
-    ChannelwiseNormalize(mean=[128.2, 106.21, 101.5],
-                         std=[17.06, 14.41, 10.31]),
+    ChannelwiseNormalize(mean=[139.33, 146.15, 126.2],
+                         std=[64.18, 65.30, 69.23]),
 ])
 
 
@@ -103,7 +103,7 @@ for idx, annotation in enumerate(custom_dataset.annotations):
     print("Category:", annotation['category'])
     print("Labels:", [class_to_idx[cat] for cat in annotation['category']])
     print("=" * 40)
-
+    '''
     # Load the image
     image_path = os.path.join(data_dir, 'block_0_0.tif')
     image = plt.imread(image_path)
@@ -118,13 +118,13 @@ for idx, annotation in enumerate(custom_dataset.annotations):
             x1, y1, x2, y2 = bbox
             rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, edgecolor='r', facecolor='none')
             ax.add_patch(rect)
-
+'''
     # Display the image with all bounding boxes
-    plt.title("Bounding Boxes Visualization")
-    plt.show()
+    #plt.title("Bounding Boxes Visualization")
+    #plt.show()
 
 # Pause and wait for user input before proceeding
-input("Press Enter to continue...")
+# input("Press Enter to continue...")
 
 
 # Create a DataLoader for training
@@ -194,7 +194,7 @@ lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.1)  # Reduce LR more frequ
 model.train()
 
 # Number of training epochs for the trial run
-num_epochs = 3  # Train for only a few epochs
+num_epochs = 2  # Train for only a few epochs
 
 
 

@@ -77,10 +77,10 @@ model.load_state_dict(torch.load('D:/RS/models/trained_model_anchor124816.pth'))
 model.eval()
 
 # Load and preprocess the new image
-image = Image.open('D:/RS/Blocks_17JULRGB/block_0_0.tif')
+image = Image.open('D:/RS/Blocks_17JULRGB_linear/block_0_0.tif')
 
 # Apply the same normalization used during training
-normalize = transforms.Normalize(mean=[128.2, 106.21, 101.5], std=[17.06, 14.41, 10.31])
+normalize = transforms.Normalize(mean=[139.33, 146.15, 126.2], std=[64.18, 65.30, 69.23])
 image_tensor = F.to_tensor(image)
 image_tensor = normalize(image_tensor).unsqueeze(0)
 
@@ -100,7 +100,7 @@ class_counters = [0] * len(classes)
 # Post-processing and visualization
 # Assuming you want to draw bounding boxes on the image
 draw = ImageDraw.Draw(image)
-detection_threshold = 0.1  # Set your own detection threshold
+detection_threshold = 0.000000000000001  # Set your own detection threshold
 # detection_threshold = 0.5  # Set your own detection threshold
 for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
     if score > detection_threshold:
