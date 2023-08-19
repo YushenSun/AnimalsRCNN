@@ -10,7 +10,7 @@ import matplotlib.patches as patches
 
 
 # Define the list of target class labels
-classes = ['elephant', 'cluster', 'non-animal']
+classes = ['zebra', 'elephant', 'cluster']
 
 # Assign unique integer codes to each target class
 class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
@@ -79,8 +79,8 @@ class ChannelwiseNormalize(object):
 # Instantiate the CustomDataset
 transform = transforms.Compose([
     transforms.ToTensor(),  # Convert PIL Image to PyTorch tensor
-    ChannelwiseNormalize(mean=[139.33, 146.15, 126.2],
-                         std=[64.18, 65.30, 69.23]),
+    ChannelwiseNormalize(mean=[187.86, 161.00, 130.82],
+                         std=[46.39, 42.23, 49.96]),
 ])
 
 
@@ -155,7 +155,7 @@ rpn_anchor_generator = AnchorGenerator(
 '''
 # Define the anchor generator with smaller anchor sizes and reduced feature maps
 rpn_anchor_generator = AnchorGenerator(
-    sizes=((1, 2, 4,6, 8),) * 5,  # Adjust sizes to match the number of feature maps
+    sizes=((3, 6, 12),) * 5,  # Adjust sizes to match the number of feature maps
     aspect_ratios=((0.5, 1.0, 2.0),) * 5
 )
 
@@ -187,14 +187,14 @@ num_epochs = 10
 
 
 # Define optimizer and learning rate scheduler with modified parameters
-optimizer = optim.SGD(model.parameters(), lr=0.00003, momentum=0.9, weight_decay=0.0005)
+optimizer = optim.SGD(model.parameters(), lr=0.00001, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.1)  # Reduce LR more frequently
 
 # Set the model in training mode
 model.train()
 
 # Number of training epochs for the trial run
-num_epochs = 2  # Train for only a few epochs
+num_epochs = 1  # Train for only a few epochs
 
 
 
@@ -254,7 +254,7 @@ for epoch in range(num_epochs):
 
 # Save the trained model
 save_path = 'D:/RS/models'
-model_name = 'trained_model_anchor124816.pth'
+model_name = 'trained_model_7.pth'
 torch.save(model.state_dict(), os.path.join(save_path, model_name))
 
 # Plot the loss curve

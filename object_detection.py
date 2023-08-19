@@ -6,7 +6,7 @@ from torchvision.models.detection.rpn import AnchorGenerator
 from PIL import Image, ImageDraw
 
 # Define the list of target class labels
-classes = ['elephant', 'cluster', 'non-animal']
+classes = ['zebra', 'elephant', 'cluster']
 
 # Define the backbone model for Faster R-CNN
 backbone = resnet_fpn_backbone('resnet50', pretrained=True)
@@ -15,7 +15,7 @@ print(backbone)
 
 # Define the anchor generator
 rpn_anchor_generator = AnchorGenerator(
-    sizes=((4, 8, 16, 32, 64),) * 5,  # Make sure to match the number of feature maps
+    sizes=((3, 6, 12),) * 5,  # Make sure to match the number of feature maps
     aspect_ratios=((0.5, 1.0, 2.0),) * 5
 )
 
@@ -73,16 +73,25 @@ def visualize_feature_maps(model, image_tensor, layer_name):
 
 
 # Load the trained model weights
-model.load_state_dict(torch.load('D:/RS/models/trained_model_anchor124816.pth'))
+model.load_state_dict(torch.load('D:/RS/models/trained_model_7.pth'))
 model.eval()
 
 # Load and preprocess the new image
-image = Image.open('D:/RS/Blocks_17JULRGB_linear/block_0_0.tif')
+image = Image.open('D:/RS/Blocks_17JULRGB_linear/block_1_0.tif')
 
-# Apply the same normalization used during training
-normalize = transforms.Normalize(mean=[139.33, 146.15, 126.2], std=[64.18, 65.30, 69.23])
+# Convert the image to a tensor and scale pixel values to [0, 1]
 image_tensor = F.to_tensor(image)
-image_tensor = normalize(image_tensor).unsqueeze(0)
+
+# Use the original normalization values
+#normalize = transforms.Normalize(mean=[187.86, 161.00, 130.82],
+ #                                std=[46.39, 42.23, 49.96])
+
+normalize = transforms.Normalize(mean=[187.86/255, 161.00/255, 130.82/255],
+                                 std=[46.39/255, 42.23/255, 49.96/255])
+
+
+
+image_tensor = normalize(image_tensor).unsqueeze(0)  # Add batch dimension
 
 # Visualize feature maps of a specific layer (e.g., 'layer3')
 # visualize_feature_maps(model, image_tensor, 'layer1')
@@ -100,13 +109,13 @@ class_counters = [0] * len(classes)
 # Post-processing and visualization
 # Assuming you want to draw bounding boxes on the image
 draw = ImageDraw.Draw(image)
-detection_threshold = 0.000000000000001  # Set your own detection threshold
+detection_threshold = 0.1  # Set your own detection threshold
 # detection_threshold = 0.5  # Set your own detection threshold
 for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
     if score > detection_threshold:
         class_counters[label] += 1  # Increment the counter for the detected class
         draw.rectangle(xy=box.tolist(), outline='red', width=3)
-        draw.text((box[0], box[1]), f'Class: {classes[label]} - Score: {score:.2f}', fill='red')
+       # draw.text((box[0], box[1]), f'Class: {classes[label]} - Score: {score:.2f}', fill='red')
 
 # Display the counts of detected objects for each class
 for i, cls in enumerate(classes):
