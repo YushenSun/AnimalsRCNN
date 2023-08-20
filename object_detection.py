@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 classes = ['zebra', 'elephant', 'cluster']
 
 # Define the backbone model for Faster R-CNN
-backbone = resnet_fpn_backbone('resnet50', pretrained=True)
+backbone = resnet_fpn_backbone('resnet18', pretrained=True)
 
 print(backbone)
 
@@ -23,7 +23,7 @@ rpn_anchor_generator = AnchorGenerator(
 model = FasterRCNN(
     backbone,
     num_classes=len(classes),  # Number of target classes
-    rpn_anchor_generator=rpn_anchor_generator
+    rpn_anchor_generator=rpn_anchor_generator, box_detections_per_img=500000
 )
 
 
@@ -73,11 +73,11 @@ def visualize_feature_maps(model, image_tensor, layer_name):
 
 
 # Load the trained model weights
-model.load_state_dict(torch.load('D:/RS/models/trained_model_7.pth'))
+model.load_state_dict(torch.load('D:/RS/models/trained_model_8.pth'))
 model.eval()
 
 # Load and preprocess the new image
-image = Image.open('D:/RS/Blocks_17JULRGB_linear/block_1_0.tif')
+image = Image.open('D:/RS/Blocks_17JULRGB_linear/block_0_0.tif')
 
 # Convert the image to a tensor and scale pixel values to [0, 1]
 image_tensor = F.to_tensor(image)
@@ -109,7 +109,7 @@ class_counters = [0] * len(classes)
 # Post-processing and visualization
 # Assuming you want to draw bounding boxes on the image
 draw = ImageDraw.Draw(image)
-detection_threshold = 0.1  # Set your own detection threshold
+detection_threshold = 0.25  # Set your own detection threshold
 # detection_threshold = 0.5  # Set your own detection threshold
 for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
     if score > detection_threshold:

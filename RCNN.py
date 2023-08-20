@@ -145,7 +145,7 @@ from torchvision.models.detection import FasterRCNN
 from torchvision.models.detection.rpn import AnchorGenerator
 
 # Define the backbone model for Faster R-CNN
-backbone = torchvision.models.detection.backbone_utils.resnet_fpn_backbone('resnet50', pretrained=True)
+backbone = torchvision.models.detection.backbone_utils.resnet_fpn_backbone('resnet18', pretrained=True)
 '''
 # Define the anchor generator
 rpn_anchor_generator = AnchorGenerator(
@@ -187,14 +187,14 @@ num_epochs = 10
 
 
 # Define optimizer and learning rate scheduler with modified parameters
-optimizer = optim.SGD(model.parameters(), lr=0.00001, momentum=0.9, weight_decay=0.0005)
+optimizer = optim.SGD(model.parameters(), lr=0.00002, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.1)  # Reduce LR more frequently
 
 # Set the model in training mode
 model.train()
 
 # Number of training epochs for the trial run
-num_epochs = 1  # Train for only a few epochs
+num_epochs = 3  # Train for only a few epochs
 
 
 
@@ -254,7 +254,7 @@ for epoch in range(num_epochs):
 
 # Save the trained model
 save_path = 'D:/RS/models'
-model_name = 'trained_model_7.pth'
+model_name = 'trained_model_8.pth'
 torch.save(model.state_dict(), os.path.join(save_path, model_name))
 
 # Plot the loss curve
