@@ -6,7 +6,7 @@ def get_image_size(image_path):
     height = dataset.RasterYSize
     return width, height
 
-image_path = 'D:/RS/17JUL.tif'  # 替换为您的图像路径
+image_path = 'D:/RS/17JUL.tif'
 width, height = get_image_size(image_path)
 
 print(f"Image width: {width} pixels")

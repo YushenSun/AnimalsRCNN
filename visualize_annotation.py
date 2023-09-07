@@ -4,10 +4,10 @@ from matplotlib.patches import Rectangle
 from PIL import Image
 
 # Path to the annotation file
-annotation_file = 'D:/RS/ano/17JUL.csv'  # Replace with your annotation file path
+annotation_file = 'D:/RS/ano/17JUL.csv'
 
 # Path to the image used for training
-image_path = 'D:/RS/Blocks_17JULRGB/block_0_0.tif'  # Replace with your image path
+image_path = 'D:/RS/Blocks_17JULRGB/block_0_0.tif'
 
 # Read annotation data from CSV file
 annotations = pd.read_csv(annotation_file)

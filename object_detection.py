@@ -34,7 +34,7 @@ def visualize_feature_maps(model, image_tensor, layer_name):
     Args:
         model (torch.nn.Module): The object detection model.
         image_tensor (torch.Tensor): Preprocessed image tensor.
-        layer_name (str): Name of the layer whose feature maps you want to visualize.
+        layer_name (str): Name of the layer whose feature maps to visualize.
     """
     # Register forward hook to capture feature maps
     feature_maps = []
@@ -95,10 +95,10 @@ with torch.no_grad():
 class_counters = [0] * len(classes)
 
 # Post-processing and visualization
-# Assuming you want to draw bounding boxes on the image
+# Draw bounding boxes on the image
 draw = ImageDraw.Draw(image)
-detection_threshold = 0.15  # Set your own detection threshold
-# detection_threshold = 0.5  # Set your own detection threshold
+detection_threshold = 0.15
+# detection_threshold = 0.5
 for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
     if score > detection_threshold:
         class_counters[label] += 1  # Increment the counter for the detected class

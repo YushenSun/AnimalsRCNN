@@ -15,7 +15,7 @@ classes = ['zebra', 'elephant', 'cluster']
 # Assign unique integer codes to each target class
 class_to_idx = {cls: idx for idx, cls in enumerate(classes)}
 
-# Define the path to your dataset and annotation file
+# Define the path to the dataset and annotation file
 data_dir = 'D:/RS/Blocks_17JULRGB_linear'
 annotation_file = 'D:/RS/ano/17JUL.csv'  # Replace with the actual annotation file path
 
@@ -105,7 +105,7 @@ for idx, annotation in enumerate(custom_dataset.annotations):
 train_loader = DataLoader(
     dataset=custom_dataset,
     batch_size=1,  # Adjust batch size as needed
-    num_workers=0,  # You can increase this value for faster data loading
+    num_workers=0,
     shuffle=True,
     collate_fn=lambda x: list(zip(*x))  # This collates the data into batches
 )
