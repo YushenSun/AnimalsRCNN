@@ -26,7 +26,6 @@ model = FasterRCNN(
     rpn_anchor_generator=rpn_anchor_generator, box_detections_per_img=500000
 )
 
-
 # Define a function to visualize intermediate feature maps
 def visualize_feature_maps(model, image_tensor, layer_name):
     """
@@ -83,25 +82,14 @@ image = Image.open('D:/RS/Blocks_17JULRGB_linear/block_0_0.tif')
 image_tensor = F.to_tensor(image)
 
 # Use the original normalization values
-#normalize = transforms.Normalize(mean=[187.86, 161.00, 130.82],
- #                                std=[46.39, 42.23, 49.96])
-
 normalize = transforms.Normalize(mean=[187.86/255, 161.00/255, 130.82/255],
                                  std=[46.39/255, 42.23/255, 49.96/255])
 
-
-
 image_tensor = normalize(image_tensor).unsqueeze(0)  # Add batch dimension
-
-# Visualize feature maps of a specific layer (e.g., 'layer3')
-# visualize_feature_maps(model, image_tensor, 'layer1')
-
 
 # Perform inference
 with torch.no_grad():
     predictions = model(image_tensor)
-
-
 
 # Initialize counters for each class
 class_counters = [0] * len(classes)
@@ -109,7 +97,7 @@ class_counters = [0] * len(classes)
 # Post-processing and visualization
 # Assuming you want to draw bounding boxes on the image
 draw = ImageDraw.Draw(image)
-detection_threshold = 0.25  # Set your own detection threshold
+detection_threshold = 0.15  # Set your own detection threshold
 # detection_threshold = 0.5  # Set your own detection threshold
 for box, label, score in zip(predictions[0]['boxes'], predictions[0]['labels'], predictions[0]['scores']):
     if score > detection_threshold:

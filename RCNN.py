@@ -1,3 +1,6 @@
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import torchvision.transforms as transforms
 from osgeo import gdal
 import os
@@ -5,9 +8,6 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-
 
 # Define the list of target class labels
 classes = ['zebra', 'elephant', 'cluster']
@@ -89,10 +89,7 @@ transform = transforms.Compose([
     transforms.ToTensor(),  # Convert PIL Image to PyTorch tensor
 ])
 
-
-
 custom_dataset = CustomDataset(data_dir, annotation_file, transform)
-
 
 # Print the loaded annotation information for debugging
 # Visualize bounding boxes on images
@@ -103,29 +100,6 @@ for idx, annotation in enumerate(custom_dataset.annotations):
     print("Category:", annotation['category'])
     print("Labels:", [class_to_idx[cat] for cat in annotation['category']])
     print("=" * 40)
-    '''
-    # Load the image
-    image_path = os.path.join(data_dir, 'block_0_0.tif')
-    image = plt.imread(image_path)
-
-    # Create a figure and axis
-    fig, ax = plt.subplots(1)
-    ax.imshow(image)
-
-    # Visualize bounding boxes on the image
-    for annotation in custom_dataset.annotations:
-        for bbox in annotation['boxes']:
-            x1, y1, x2, y2 = bbox
-            rect = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, edgecolor='r', facecolor='none')
-            ax.add_patch(rect)
-'''
-    # Display the image with all bounding boxes
-    #plt.title("Bounding Boxes Visualization")
-    #plt.show()
-
-# Pause and wait for user input before proceeding
-# input("Press Enter to continue...")
-
 
 # Create a DataLoader for training
 train_loader = DataLoader(
@@ -136,8 +110,6 @@ train_loader = DataLoader(
     collate_fn=lambda x: list(zip(*x))  # This collates the data into batches
 )
 
-# ... (rest of the code for the model, training loop, etc.)
-# ... (previous code)
 
 # Define the object detection model
 import torchvision
@@ -167,46 +139,25 @@ model = FasterRCNN(
     rpn_anchor_generator=rpn_anchor_generator
 )
 
-
-
 # Training loop
 import torch.optim as optim
 from torch.optim.lr_scheduler import StepLR
 
-'''
-# Define optimizer and learning rate scheduler
-optimizer = optim.SGD(model.parameters(), lr=0.005, momentum=0.9, weight_decay=0.0005)
-lr_scheduler = StepLR(optimizer, step_size=3, gamma=0.1)
-
-# Set the model in training mode
-model.train()
-
-# Number of training epochs
-num_epochs = 10
-'''
-
 
 # Define optimizer and learning rate scheduler with modified parameters
-optimizer = optim.SGD(model.parameters(), lr=0.00002, momentum=0.9, weight_decay=0.0005)
+optimizer = optim.SGD(model.parameters(), lr=0.00003, momentum=0.9, weight_decay=0.0005)
 lr_scheduler = StepLR(optimizer, step_size=2, gamma=0.1)  # Reduce LR more frequently
 
 # Set the model in training mode
 model.train()
 
 # Number of training epochs for the trial run
-num_epochs = 3  # Train for only a few epochs
-
-
-
-
-
-
+num_epochs = 2  # Train for only a few epochs
 
 # Define the device (GPU if available, otherwise CPU)
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 losses = []  # List to store loss values
-
 
 # Training loop
 for epoch in range(num_epochs):
@@ -247,10 +198,6 @@ for epoch in range(num_epochs):
     lr_scheduler.step()
 
     print(f"Epoch [{epoch+1}/{num_epochs}] - Total Loss: {total_loss.item()}")
-
-# ... (continue with validation, evaluation, inference, and saving the model)
-
-
 
 # Save the trained model
 save_path = 'D:/RS/models'

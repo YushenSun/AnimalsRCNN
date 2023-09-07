@@ -21,7 +21,7 @@ def split_image(input_image_path, output_folder, block_size, overlap):
             y_size = min(block_size, height - j)
 
 
-            output_filename = os.path.join(output_folder, f"block_{m}_{n}.tif")
+            output_filename = os.path.join(output_folder, f"block1_{m}_{n}.tif")
             n = n + 1
             gdal.Translate(output_filename, dataset, format="GTiff", srcWin=(x_offset, y_offset, x_size, y_size))
 
@@ -37,8 +37,8 @@ if __name__ == "__main__":
 
     split_image(input_image_path, output_folder, block_size, overlap)
     '''
-    input_image_path = "D:/RS/Blocks_17JULRGB_linear/block_0_0.tif"
-    output_folder = "D:/RS/Blocks_17JULRGB_linear_small"
+    input_image_path = "D:/RS/Blocks_17JULRGB_linear/block_1_0.tif"
+    output_folder = "D:/RS/Blocks_17JULRGB_linear_small1"
     block_size = 16
     overlap = 0
 

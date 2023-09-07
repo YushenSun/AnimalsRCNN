@@ -16,7 +16,7 @@ cols = dataset.RasterXSize
 num_bands = dataset.RasterCount
 
 # Specify the bands to use for each color channel
-'''
+
 blue_bands = [1, 2, 3]  # Bands for blue channel (averaged)
 green_bands = [4, 5, 6]  # Bands for green channel (averaged)
 red_bands = [7, 8]  # Bands for red channel (averaged)
@@ -24,8 +24,7 @@ red_bands = [7, 8]  # Bands for red channel (averaged)
 blue_bands = [3]  # Bands for blue channel (averaged)
 green_bands = [5]  # Bands for green channel (averaged)
 red_bands = [7]  # Bands for red channel (averaged)
-
-
+'''
 # Read the pixel values from the specified bands and calculate averages
 blue_data = sum(dataset.GetRasterBand(band).ReadAsArray() for band in blue_bands) / len(blue_bands)
 green_data = sum(dataset.GetRasterBand(band).ReadAsArray() for band in green_bands) / len(green_bands)
